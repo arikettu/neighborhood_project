@@ -87,19 +87,21 @@ pub type HOOKPROC = extern "C" fn(i32, WPARAM, LPARAM) -> LRESULT;
 
 #[link(name = "user32")]
 unsafe extern "system" {
-    pub unsafe fn SetWindowsHookExW(
+    pub fn SetWindowsHookExW(
         idHook: i32,
         lpfn: HOOKPROC,
         hmod: HINSTANCE,
         dwThreadId: u32,
     ) -> HHOOK;
 
-    pub unsafe fn CallNextHookEx(
+    pub fn CallNextHookEx(
         hhk: HHOOK,
         nCode: i32,
         wParam: WPARAM,
         lParam: LPARAM,
     ) -> LRESULT;
+
+    pub fn GetLastError() -> i32;
 }
 
 #[allow(non_snake_case)]
@@ -114,7 +116,9 @@ extern "C" fn low_level_keyboard_proc(
 
     let key = unsafe { &*(lParam as *const KBDLLHOOKSTRUCT) };
 
-    println!("Key pressed: {}", key.vkCode);
+    if key.flags & 0x80 != 0 {
+        println!("Key pressed: {}", key.vkCode);
+    }
 
     0
 }
@@ -122,16 +126,14 @@ extern "C" fn low_level_keyboard_proc(
 pub fn init() -> Result<(), Box<dyn core::error::Error>> {
     let hook = unsafe {
         SetWindowsHookExW(
-            14, // WH_KEYBOARD_LL
+            13,
             low_level_keyboard_proc,
             0,
             0,
         )
     };
 
-    if hook == 0 { return Err("Failed to set hook".into()); }
-
-    println!("Hook set successfully");
+    if hook == 0 { return Err( format!("os error {}", unsafe { GetLastError() }).into() ); }
 
     Ok(())
 }
