@@ -31,13 +31,11 @@ extern "C" fn low_level_keyboard_proc(
     let mut state = STATE.lock().unwrap();
 
     state.set(key.vkCode as u8, down);
-    
-    match CALLBACKS.lock().unwrap().get(&state) {
-        Some(c) => { c(); },
-        None => {}
-    }
 
-    0
+    match CALLBACKS.lock().unwrap().get(&state) {
+        Some(c) => { c(); 1 },
+        None => { 0 }
+    }
 }
 
 pub fn init() -> Result<(), Box<dyn core::error::Error>> {
@@ -72,10 +70,10 @@ impl KeyboardState {
     }
 
     /// Parses a string in the format "KEY1 KEY2 KEY3 ..." as a KeyboardState.
-    /// Key names are the same as [the virtual key code constants on MSDN](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) without the `VK_` prefix
+    /// Key names are the same as [the virtual key code constants](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) without the `VK_` prefix
     pub fn parse(s: String) -> Option<Self> {
         let mut state = Self::new();
-        
+
         for key in s.split(" ") {
             state.set(match key {
                 "LBUTTON" => 0x01,

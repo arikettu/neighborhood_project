@@ -4,8 +4,8 @@ mod hook;
 // temporary message loop things
 // will be replaced with something less stupid later
 
-#[repr(C)]
 #[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct MSG {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>
@@ -31,7 +31,7 @@ fn test_print() {
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     hk::init()?;
-    hk::add_shortcut(hk::KeyboardState::parse("F7".into()).unwrap(), test_print)?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F2".into()).unwrap(), test_print)?;
 
     // this block is also a temporary message loop thing
     unsafe {
