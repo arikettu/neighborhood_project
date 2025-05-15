@@ -15,6 +15,7 @@ pub type LPARAM = isize;
 pub type LRESULT = isize;
 pub type HOOKPROC = extern "C" fn(i32, WPARAM, LPARAM) -> LRESULT;
 
+#[allow(non_snake_case)]
 #[link(name = "user32")]
 unsafe extern "system" {
     pub fn SetWindowsHookExW(

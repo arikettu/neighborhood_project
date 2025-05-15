@@ -31,7 +31,7 @@ fn test_print() {
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     hk::init()?;
-    hk::add_shortcut("F7".parse()?, test_print)?;
+    hk::add_shortcut(hk::KeyboardState::parse("F7".into()).unwrap(), test_print)?;
 
     // this block is also a temporary message loop thing
     unsafe {
