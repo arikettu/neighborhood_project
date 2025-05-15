@@ -44,20 +44,20 @@ fn create_timer() {
 
     let mut input = String::new();
     std::io::stdin().read_line(&mut input).unwrap();
-    let len = match input.trim().parse::<u64>() {
-        Ok(n) => { n },
-        Err(_) => { return }
+    match input.trim().parse::<u64>() {
+        Ok(n) => {
+            thread::spawn(move || {
+                thread::sleep(Duration::from_secs(n));
+                println!("{} second timer complete", n);
+            });
+        },
+        Err(_) => { println!("timer not started"); }
     };
-    
-    thread::spawn(move || {
-        thread::sleep(Duration::from_secs(len));
-        println!("done");
-    });
 }
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     hk::init()?;
-    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL".into()).unwrap(), create_timer)?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F11".into()).unwrap(), create_timer)?;
 
     message_loop();
     Ok(())
