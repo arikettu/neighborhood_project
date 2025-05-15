@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::hook::*;
 
 /// Two [`u128`]s with each bit corresponding to a [`vkCode`](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub struct KeyboardState {
     /// `vkCode`s 0x00..=0x7F
     lower_half: u128,
@@ -29,7 +29,7 @@ extern "C" fn low_level_keyboard_proc(
     let down =  key.flags & 0x80 == 0;
 
     let mut state = STATE.lock().unwrap();
-    
+
     state.set(key.vkCode as u8, down);
     
     match CALLBACKS.lock().unwrap().get(&state) {
@@ -56,10 +56,18 @@ impl KeyboardState {
 
     /// Sets the vk_code as up or down.
     pub fn set(&mut self, vk_code: u8, down: bool) {
-        if vk_code >= 0x80 {
-            self.upper_half &= (down as u128) << vk_code - 0x80;
+        if down {
+            if vk_code >= 0x80 {
+                self.upper_half |= 1 << vk_code - 0x80;
+            } else {
+                self.lower_half |= 1 << vk_code;
+            }
         } else {
-            self.lower_half &= (down as u128) << vk_code;
+            if vk_code >= 0x80 {
+                self.upper_half &= !(1 << vk_code - 0x80);
+            } else {
+                self.lower_half &= !(1 << vk_code);
+            }
         }
     }
 
