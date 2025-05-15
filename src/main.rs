@@ -1,6 +1,10 @@
 mod hk;
 mod hook;
 
+use std::io::Write;
+use std::thread;
+use std::time::Duration;
+
 // temporary message loop things
 // will be replaced with something less stupid later
 
@@ -23,25 +27,38 @@ unsafe extern "system" {
     pub fn DispatchMessageA(lpMsg: *const MSG) -> isize;
 }
 
+fn message_loop() { unsafe {
+    let mut msg: MSG = core::mem::zeroed();
+    loop {
+        if GetMessageA(&mut msg, core::ptr::null_mut(), 0, 0) == 0 { break; }
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+    }
+} }
+
 // end temporary message loop things
 
-fn test_print() {
-    println!("hi");
+fn create_timer() {
+    print!("timer length (seconds): ");
+    std::io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
+    let len = match input.trim().parse::<u64>() {
+        Ok(n) => { n },
+        Err(_) => { return }
+    };
+    
+    thread::spawn(move || {
+        thread::sleep(Duration::from_secs(len));
+        println!("done");
+    });
 }
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     hk::init()?;
-    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F2".into()).unwrap(), test_print)?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL".into()).unwrap(), create_timer)?;
 
-    // this block is also a temporary message loop thing
-    unsafe {
-        let mut msg: MSG = core::mem::zeroed();
-        loop {
-            if GetMessageA(&mut msg, core::ptr::null_mut(), 0, 0) == 0 { break; }
-            TranslateMessage(&msg);
-            DispatchMessageA(&msg);
-        }
-    }
-
+    message_loop();
     Ok(())
 }

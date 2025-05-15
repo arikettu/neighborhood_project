@@ -11,43 +11,6 @@ pub struct KeyboardState {
     upper_half: u128,
 }
 
-lazy_static::lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<KeyboardState, fn()>> = Mutex::new(HashMap::new());
-}
-
-static STATE: Mutex<KeyboardState> = Mutex::new(KeyboardState::new());
-
-#[allow(non_snake_case)]
-extern "C" fn low_level_keyboard_proc(
-    nCode: i32,
-    wParam: WPARAM,
-    lParam: LPARAM
-) -> LRESULT {
-    if nCode < 0 { return unsafe { CallNextHookEx(0, nCode, wParam, lParam) }; }
-    let key = unsafe { &*(lParam as *const KBDLLHOOKSTRUCT) };
-
-    let down =  key.flags & 0x80 == 0;
-
-    let mut state = STATE.lock().unwrap();
-
-    state.set(key.vkCode as u8, down);
-
-    match CALLBACKS.lock().unwrap().get(&state) {
-        Some(c) => { c(); 1 },
-        None => { 0 }
-    }
-}
-
-pub fn init() -> Result<(), Box<dyn core::error::Error>> {
-    unsafe {
-        if SetWindowsHookExW(13, low_level_keyboard_proc, 0, 0) == 0 {
-            return Err(format!("os error {}", GetLastError()).into());
-        }
-    }
-
-    Ok(())
-}
-
 impl KeyboardState {
     /// Zeroed state (all keys up)
     pub const fn new() -> Self { Self { lower_half: 0, upper_half: 0 } }
@@ -256,6 +219,43 @@ impl KeyboardState {
 
         Some(state)
     }
+}
+
+lazy_static::lazy_static! {
+    static ref CALLBACKS: Mutex<HashMap<KeyboardState, fn()>> = Mutex::new(HashMap::new());
+}
+
+static STATE: Mutex<KeyboardState> = Mutex::new(KeyboardState::new());
+
+#[allow(non_snake_case)]
+extern "C" fn low_level_keyboard_proc(
+    nCode: i32,
+    wParam: WPARAM,
+    lParam: LPARAM
+) -> LRESULT {
+    if nCode < 0 { return unsafe { CallNextHookEx(0, nCode, wParam, lParam) }; }
+    let key = unsafe { &*(lParam as *const KBDLLHOOKSTRUCT) };
+
+    let down =  key.flags & 0x80 == 0;
+
+    let mut state = STATE.lock().unwrap();
+
+    state.set(key.vkCode as u8, down);
+
+    match CALLBACKS.lock().unwrap().get(&state).copied() {
+        Some(c) => { std::thread::spawn(c); 1 },
+        None => { 0 }
+    }
+}
+
+pub fn init() -> Result<(), Box<dyn core::error::Error>> {
+    unsafe {
+        if SetWindowsHookExW(13, low_level_keyboard_proc, 0, 0) == 0 {
+            return Err(format!("os error {}", GetLastError()).into());
+        }
+    }
+
+    Ok(())
 }
 
 pub fn add_shortcut(shortcut: KeyboardState, callback: fn()) -> Result<(), Box<dyn core::error::Error>> {
