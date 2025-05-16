@@ -1,6 +1,8 @@
+mod hook;
+
 use std::sync::Mutex;
 use std::collections::HashMap;
-use crate::hook::*;
+use hook::*;
 
 /// Two [`u128`]s with each bit corresponding to a [`vkCode`](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 #[derive(Eq, Hash, PartialEq, Debug)]

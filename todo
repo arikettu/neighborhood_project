@@ -1,0 +1,4 @@
+[ hotkeys ]
+- be more strict on activating shortcuts (don't just compare states)
+- support windows keys
+

@@ -1,5 +1,5 @@
 mod hk;
-mod hook;
+mod config;
 
 use std::io::Write;
 use std::thread;
@@ -58,6 +58,13 @@ fn create_timer() {
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     hk::init()?;
     hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F11".into()).unwrap(), create_timer)?;
+    let cfg = match config::config() {
+        Ok(cfg) => { Some(cfg) },
+        Err(e) => {
+            println!("could not load config");
+            None
+        }
+    };
 
     message_loop();
     Ok(())
