@@ -1,4 +1,10 @@
+[ timers ]
+- organize them
+- allow series of timers
+
 [ hotkeys ]
 - be more strict on activating shortcuts (don't just compare states)
 - support windows keys
 
+[ config ]
+- set up things that require configuration

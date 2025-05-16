@@ -1,0 +1,15 @@
+import { VerticalBox, Button } from "std-widgets.slint";
+
+export component App inherits Window {
+    callback close;
+
+    VerticalBox {
+        Text {
+            text: "Hello World!";
+        }
+        Button {
+            text: "Close";
+            clicked => { close(); }
+        }
+    }
+}
