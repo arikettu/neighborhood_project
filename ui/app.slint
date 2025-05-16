@@ -1,15 +1,47 @@
-import { VerticalBox, Button } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
+
+component MenuItem {
+    in property <string> text;
+    in property <bool> selected;
+
+    Text {
+        text: text;
+        color: selected ? blue : white;
+    }
+}
+
+component Timer {
+    in property <int> time: 0;
+    callback timeout;
+
+    Text {
+        text: time;
+    }
+}
 
 export component App inherits Window {
+    property <[int]> timers: [1000, 2000, 3000];
     callback close;
+    property <[string]> menu_items: [
+        "Item 1",
+        "Item 2",
+        "Item 3"
+    ];
+    property <int> selected: 0;
+
+    function sel_left() { selected = Math.mod((selected - 1), 3); }
+    function sel_right() { selected = Math.mod((selected + 1), 3); }
 
     VerticalBox {
-        Text {
-            text: "Hello World!";
+        HorizontalBox {
+            for i in menu_items.length: MenuItem {
+                text: menu_items[i];
+                selected: i == selected;
+            }
         }
-        Button {
-            text: "Close";
-            clicked => { close(); }
+        for i in timers: Timer {
+            time: i;
+            timeout => { close(); }
         }
     }
 }
