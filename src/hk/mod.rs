@@ -264,6 +264,7 @@ pub fn add_shortcut(shortcut: KeyboardState, callback: fn()) -> Result<(), Box<d
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn remove_shortcut(shortcut: &KeyboardState) -> Result<(), Box<dyn core::error::Error>> {
     CALLBACKS.lock()?.remove(shortcut);
     Ok(())

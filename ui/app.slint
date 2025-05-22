@@ -38,7 +38,7 @@ component Timer {
 }
 
 export component App inherits Window {
-    property <[int]> timers: [1000, 2000, 3000];
+    in property <[int]> timers;
     in property <[string]> presets;
     
     property <bool> menu: false;
@@ -46,7 +46,7 @@ export component App inherits Window {
     
     callback open;
     callback close;
-    callback create;
+    callback create(int, int, int);
     callback pause;
     callback cancel;
 
