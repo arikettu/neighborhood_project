@@ -44,11 +44,18 @@ unsafe extern "system" {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Config {
+pub struct Preset {
+    pub title: String,
+    pub length: u64
+}
 
+#[derive(Serialize, Deserialize)]
+pub struct Config {
+    pub presets: Vec<Preset>
 }
 
 pub fn config() -> Result<Config, Box<dyn core::error::Error>> {
+    #[allow(non_snake_case)]
     let FOLDERID_LocalAppData = GUID {
         l: 0xF1B32785,
         w1: 0x6FBA,

@@ -1,6 +1,6 @@
 mod hook;
 
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use std::collections::HashMap;
 use hook::*;
 
@@ -223,9 +223,7 @@ impl KeyboardState {
     }
 }
 
-lazy_static::lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<KeyboardState, fn()>> = Mutex::new(HashMap::new());
-}
+static CALLBACKS: LazyLock<Mutex<HashMap<KeyboardState, fn()>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 static STATE: Mutex<KeyboardState> = Mutex::new(KeyboardState::new());
 
@@ -245,7 +243,8 @@ extern "C" fn low_level_keyboard_proc(
     state.set(key.vkCode as u8, down);
 
     match CALLBACKS.lock().unwrap().get(&state).copied() {
-        Some(c) => { std::thread::spawn(c); 1 },
+        // Some(c) => { std::thread::spawn(c); 1 },
+        Some(c) => { c(); 1 },
         None => { 0 }
     }
 }

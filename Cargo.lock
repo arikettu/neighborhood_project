@@ -6,7 +6,6 @@ version = 4
 name = "__neighborhood_project"
 version = "0.1.0"
 dependencies = [
- "lazy_static",
  "serde",
  "serde_json",
  "slint",
