@@ -2,24 +2,33 @@ mod config;
 mod hk;
 mod app;
 
-use std::sync::OnceLock;
+use std::sync::{OnceLock, RwLock};
 use slint::{ComponentHandle, ModelRc};
 
 slint::include_modules!();
 
 // slint::Weak being sync is a fucking lie
 pub(crate) static APP_HANDLE: OnceLock<slint::Weak<App>> = OnceLock::new();
+pub(crate) static OPEN: RwLock<bool> = RwLock::new(false);
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     let app = App::new()?;
     match APP_HANDLE.set(app.as_weak()) {
         Ok(_) => {},
-        Err(_) => { return Err("what".into()); }
+        Err(_) => { return Err("??".into()); }
     }
-    hk::init()?;
-    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F11".into()).unwrap(), || APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_create(1, 0, 0))?;
     app.on_create(app::create);
-    app.on_close(app::close);
+    app.on_show(app::show);
+    app.on_hide(app::hide);
+    hk::init()?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F11".into()).unwrap(), || {
+        let mut open = OPEN.write().unwrap();
+        match *open {
+            true => { APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_hide(); },
+            false => { APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_show(); }
+        }
+        *open = !*open;
+    })?;
     match config::config() {
         Ok(cfg) => {
             app.set_presets(ModelRc::from(
@@ -35,6 +44,6 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             println!("default config path is %LOCALAPPDATA%\\neighborhood\\config.json");
         }
     };
-    app.run()?;
+    slint::run_event_loop_until_quit()?;
     Ok(())
 }

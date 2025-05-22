@@ -44,8 +44,8 @@ export component App inherits Window {
     property <bool> menu: false;
     property <int> selected: 0;
     
-    callback open;
-    callback close;
+    callback show;
+    callback hide;
     callback create(int, int, int);
     callback pause;
     callback cancel;
@@ -66,7 +66,7 @@ export component App inherits Window {
         VerticalLayout {
             for i in timers: Timer {
                 time: i;
-                timeout => { close(); }
+                timeout => { pause(); }
             }
         }
     }
