@@ -28,7 +28,6 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             false => { app.invoke_show(); }
         }
     })?;
-    // hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F12".into()).unwrap(), || window::style())?;
     hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F10".into()).unwrap(), || APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_create(1, 0, 0))?;
     match config::config() {
         Ok(cfg) => {

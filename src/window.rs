@@ -10,11 +10,6 @@ unsafe extern "C" {
         dwNewLong: i64,
     ) -> isize;
 
-    pub fn GetWindowLongPtrW(
-        hWnd: isize,
-        nIndex: i32,
-    ) -> isize;
-
     pub fn SetMenu(
         hWnd: isize,
         hMenu: isize,
@@ -57,5 +52,5 @@ pub(crate) fn style() { unsafe {
     SetWindowLongPtrW(handle, -20, 0x80);
     SetMenu(handle, 0);
     // SetWindowLongPtrW(handle, -4, wnd_proc as i64);
-    SetWindowPos(handle, 0, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0008 | 0x0010);
+    SetWindowPos(handle, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0008 | 0x0010);
 } }
