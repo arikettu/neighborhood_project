@@ -5,7 +5,6 @@ mod window;
 
 use std::sync::OnceLock;
 use slint::{ComponentHandle, ModelRc};
-use raw_window_handle::HasWindowHandle;
 
 slint::include_modules!();
 
@@ -29,6 +28,8 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             false => { app.invoke_show(); }
         }
     })?;
+    // hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F12".into()).unwrap(), || window::style())?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F10".into()).unwrap(), || APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_create(1, 0, 0))?;
     match config::config() {
         Ok(cfg) => {
             app.set_presets(ModelRc::from(
@@ -44,10 +45,6 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             println!("default config path is %LOCALAPPDATA%\\neighborhood\\config.json");
         }
     };
-    window::style(match APP_HANDLE.get().unwrap().upgrade().unwrap().window().window_handle().window_handle().unwrap().as_raw() {
-        raw_window_handle::RawWindowHandle::Win32(handle) => { isize::from(handle.hwnd) }
-        _ => { unreachable!() }
-    });
     slint::run_event_loop_until_quit()?;
     Ok(())
 }

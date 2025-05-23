@@ -1,10 +1,5 @@
-const GWL_STYLE: i32 = -16;
-const WS_POPUP: i64 = 0x80000000;
-const WS_VISIBLE: i64 = 0x10000000;
-const GWL_EXSTYLE: i32 = -20;
-const WS_EX_TOOLWINDOW: i64 = 0x00000080;
-const GWLP_WNDPROC: i32 = -4;
-const WM_CLOSE: u32 = 0x0010;
+use slint::ComponentHandle;
+use raw_window_handle::HasWindowHandle;
 
 #[allow(non_snake_case)]
 #[link(name = "user32")]
@@ -12,7 +7,12 @@ unsafe extern "C" {
     pub fn SetWindowLongPtrW(
         hWnd: isize,
         nIndex: i32,
-        dwNewLong: isize,
+        dwNewLong: i64,
+    ) -> isize;
+
+    pub fn GetWindowLongPtrW(
+        hWnd: isize,
+        nIndex: i32,
     ) -> isize;
 
     pub fn SetMenu(
@@ -26,16 +26,36 @@ unsafe extern "C" {
         wParam: u64,
         lParam: isize,
     ) -> isize;
+
+    pub fn SetWindowPos(
+        hWnd: isize,
+        hWndInsertAfter: isize,
+        X: i32,
+        Y: i32,
+        cx: i32,
+        cy: i32,
+        uFlags: u32,
+    ) -> bool;
 }
 
+fn get_handle() -> isize {
+    match crate::APP_HANDLE.get().unwrap().upgrade().unwrap().window().window_handle().window_handle().unwrap().as_raw() {
+        raw_window_handle::RawWindowHandle::Win32(handle) => { isize::from(handle.hwnd) }
+        _ => { unreachable!() }
+    }
+}
+
+#[allow(non_snake_case)]
 extern "C" fn wnd_proc(hWnd: isize, uMsg: u32, wParam: u64, lParam: isize) -> isize {
-    if uMsg == WM_CLOSE { return 0; }
+    if uMsg == 0x10 { return 0; }
     unsafe { DefWindowProcW(hWnd, uMsg, wParam, lParam) }
 }
 
-pub(crate) fn style(handle: isize) { unsafe {
-    SetWindowLongPtrW(handle, GWL_STYLE, (WS_POPUP | WS_VISIBLE) as isize);
-    // SetWindowLongPtrW(handle, GWL_EXSTYLE, WS_EX_TOOLWINDOW as isize);
-    // SetMenu(handle, 0);
-    SetWindowLongPtrW(handle, GWLP_WNDPROC, wnd_proc as isize);
+pub(crate) fn style() { unsafe {
+    let handle = get_handle();
+    SetWindowLongPtrW(handle, -16, 0x80000000 | 0x10000000);
+    SetWindowLongPtrW(handle, -20, 0x80);
+    SetMenu(handle, 0);
+    // SetWindowLongPtrW(handle, -4, wnd_proc as i64);
+    SetWindowPos(handle, 0, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0008 | 0x0010);
 } }
