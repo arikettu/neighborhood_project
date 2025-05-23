@@ -1,15 +1,16 @@
 mod config;
 mod hk;
 mod app;
+mod window;
 
-use std::sync::{OnceLock, RwLock};
+use std::sync::OnceLock;
 use slint::{ComponentHandle, ModelRc};
+use raw_window_handle::HasWindowHandle;
 
 slint::include_modules!();
 
 // slint::Weak being sync is a fucking lie
 pub(crate) static APP_HANDLE: OnceLock<slint::Weak<App>> = OnceLock::new();
-pub(crate) static OPEN: RwLock<bool> = RwLock::new(false);
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     let app = App::new()?;
@@ -22,12 +23,11 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
     app.on_hide(app::hide);
     hk::init()?;
     hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F11".into()).unwrap(), || {
-        let mut open = OPEN.write().unwrap();
-        match *open {
-            true => { APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_hide(); },
-            false => { APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_show(); }
+        let app = APP_HANDLE.get().unwrap().upgrade().unwrap();
+        match app.window().is_visible() {
+            true => { app.invoke_hide(); },
+            false => { app.invoke_show(); }
         }
-        *open = !*open;
     })?;
     match config::config() {
         Ok(cfg) => {
@@ -44,6 +44,10 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             println!("default config path is %LOCALAPPDATA%\\neighborhood\\config.json");
         }
     };
+    window::style(match APP_HANDLE.get().unwrap().upgrade().unwrap().window().window_handle().window_handle().unwrap().as_raw() {
+        raw_window_handle::RawWindowHandle::Win32(handle) => { isize::from(handle.hwnd) }
+        _ => { unreachable!() }
+    });
     slint::run_event_loop_until_quit()?;
     Ok(())
 }
