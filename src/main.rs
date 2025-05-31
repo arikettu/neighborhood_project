@@ -1,3 +1,6 @@
+#[cfg(not(target_os = "windows"))]
+compile_error!("unsupported target");
+
 mod config;
 mod hk;
 mod app;
@@ -44,6 +47,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             println!("default config path is %LOCALAPPDATA%\\neighborhood\\config.json");
         }
     };
+    std::thread::spawn(|| loop { app::update() });
     slint::run_event_loop_until_quit()?;
     Ok(())
 }

@@ -15,12 +15,12 @@ unsafe extern "C" {
         hMenu: isize,
     ) -> bool;
 
-    pub fn DefWindowProcW(
-        hWnd: isize,
-        uMsg: u32,
-        wParam: u64,
-        lParam: isize,
-    ) -> isize;
+    // pub fn DefWindowProcW(
+    //     hWnd: isize,
+    //     uMsg: u32,
+    //     wParam: u64,
+    //     lParam: isize,
+    // ) -> isize;
 
     pub fn SetWindowPos(
         hWnd: isize,
@@ -40,11 +40,11 @@ fn get_handle() -> isize {
     }
 }
 
-#[allow(non_snake_case)]
-extern "C" fn wnd_proc(hWnd: isize, uMsg: u32, wParam: u64, lParam: isize) -> isize {
-    if uMsg == 0x10 { return 0; }
-    unsafe { DefWindowProcW(hWnd, uMsg, wParam, lParam) }
-}
+// #[allow(non_snake_case)]
+// extern "C" fn wnd_proc(hWnd: isize, uMsg: u32, wParam: u64, lParam: isize) -> isize {
+//     if uMsg == 0x10 { return 0; }
+//     unsafe { DefWindowProcW(hWnd, uMsg, wParam, lParam) }
+// }
 
 pub(crate) fn style() { unsafe {
     let handle = get_handle();
