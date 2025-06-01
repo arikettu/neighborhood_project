@@ -31,7 +31,7 @@ component Timer {
         background: time > 2000 ? #3a443b : #5c3737;
 
         Text {
-            text: time;
+            text: (Math.floor(time / 3600) != 0 ? Math.floor(time / 3600) + ":" : "") + (Math.floor(Math.mod(time, 3600) / 60) < 10 && Math.floor(time / 3600) != 0 ? "0" : "") + Math.floor(Math.mod(time, 3600) / 60) + ":" + (Math.floor(Math.mod(time, 60)) < 10 ? "0" : "") + Math.floor(Math.mod(time, 60));
             horizontal-alignment: left;
         }
     }
