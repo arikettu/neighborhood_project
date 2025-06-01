@@ -25,10 +25,10 @@ component TimerInput {
 
 component Timer {
     in property <int> time;
-    callback timeout;
+    in property <int> length;
 
     Rectangle {
-        background: time > 2000 ? #3a443b : #5c3737;
+        background: #3a443b.mix(#5c3737, time / length * 2);
 
         Text {
             text: (Math.floor(time / 3600) != 0 ? Math.floor(time / 3600) + ":" : "") + (Math.floor(Math.mod(time, 3600) / 60) < 10 && Math.floor(time / 3600) != 0 ? "0" : "") + Math.floor(Math.mod(time, 3600) / 60) + ":" + (Math.floor(Math.mod(time, 60)) < 10 ? "0" : "") + Math.floor(Math.mod(time, 60));
@@ -38,7 +38,7 @@ component Timer {
 }
 
 export component App inherits Window {
-    in property <[int]> timers;
+    in property <[{a: int, b: int}]> timers;
     in property <[string]> presets;
     
     property <bool> menu: false;
@@ -65,8 +65,8 @@ export component App inherits Window {
 
         VerticalLayout {
             for i in timers: Timer {
-                time: i;
-                timeout => { pause(); }
+                time: i.a;
+                length: i.b;
             }
         }
     }

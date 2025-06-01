@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
             false => { app.invoke_show(); }
         }
     })?;
-    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F10".into()).unwrap(), || APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_create(1, 0, 0))?;
+    hk::add_shortcut(hk::KeyboardState::parse("LCONTROL F10".into()).unwrap(), || APP_HANDLE.get().unwrap().upgrade().unwrap().invoke_create(0, 0, 10))?;
     match config::config() {
         Ok(cfg) => {
             app.set_presets(ModelRc::from(
